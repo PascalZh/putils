@@ -2,7 +2,7 @@ import numpy as np
 from numpy.lib.function_base import iterable
 
 
-def gen_mif(vec: iterable, file, depth: int, width=8):
+def gen_mif(file: str, vec: iterable, depth: int, width=8):
     """Generate mif binary data file
 
     Args:
@@ -20,10 +20,10 @@ def gen_mif(vec: iterable, file, depth: int, width=8):
             return x
 
     vec_clipped = None
-    if (type(vec) == np.ndarray):
-      vec_clipped = np.clip(vec, 0, 2**depth - 1)
+    if (type(vec) == np.ndarray):  # clip to unsigned `width`-bit integer
+      vec_clipped = np.clip(vec, 0, (1<<width) - 1)
     else:
-      vec_clipped = [clip(x, 0, 2**depth - 1) for x in vec]
+      vec_clipped = [clip(x, 0, (1<<width) - 1) for x in vec]
 
     def print_file(*arg):
         print(*arg, file=file)
@@ -33,5 +33,5 @@ def gen_mif(vec: iterable, file, depth: int, width=8):
     print_file('ADDRESS_RADIX=UNS;\nDATA_RADIX=UNS;\n')
     print_file('CONTENT BEGIN')
     for i in range(depth):
-        print_file('  %i\t:\t%i;' % (i, vec_clipped[i]))
+        print_file('  %i\t:\t%i;' % (i, vec_clipped[i] if i < len(vec) else 0))
     print_file('END;')
